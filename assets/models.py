@@ -3,12 +3,7 @@ from decimal import Decimal
 from django.db import models
 from django.core.validators import RegexValidator, MinValueValidator
 
-
-class AssetType(models.TextChoices):
-    STOCK = 'stock', 'Stock'
-    ETF = 'etf', 'ETF'
-    CRYPTO = 'crypto', 'Crypto'
-    OTHER = 'other', 'Other'
+from .choices import AssetType
 
 
 class Asset(models.Model):
