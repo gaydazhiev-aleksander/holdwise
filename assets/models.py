@@ -1,12 +1,18 @@
+from datetime import timedelta
 from decimal import Decimal
 
+from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
-from django.core.validators import RegexValidator, MinValueValidator
+from django.utils import timezone
 
 from .choices import AssetType
+from .exceptions import MarketDataError
+from .services import MarketDataService
 
 
 class Asset(models.Model):
+    PRICE_MAX_AGE = timedelta(minutes=1)
+
     ticker = models.CharField(
         max_length=10,
         unique=True,
@@ -43,3 +49,30 @@ class Asset(models.Model):
 
     def __str__(self):
         return f'{self.ticker} - {self.name}'
+
+    @property
+    def is_price_stale(self):
+        """True if the price was never fetched or is older than PRICE_MAX_AGE."""
+        return (
+                self.price_updated_at is None
+                or timezone.now() - self.price_updated_at > self.PRICE_MAX_AGE
+        )
+
+    def refresh_price(self, service=None):
+        """Fetch a fresh price if the current one is stale.
+
+        Return True if the price is up to date afterwards, False if fetching failed.
+        """
+        if not self.is_price_stale:
+            return True
+
+        service = service or MarketDataService()
+
+        try:
+            self.last_price = service.fetch_price(self.ticker)
+        except MarketDataError:
+            return False
+
+        self.price_updated_at = timezone.now()
+        self.save(update_fields=['last_price', 'price_updated_at'])
+        return True
