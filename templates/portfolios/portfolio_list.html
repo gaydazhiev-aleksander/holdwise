@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Portfolios{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 fw-bold mb-0">Portfolios</h1>
+        {# step 9.3: "New portfolio" button goes here #}
+    </div>
+
+    {% if portfolios %}
+        <div class="row g-3">
+            {% for portfolio in portfolios %}
+                <div class="col-md-6 col-lg-4">
+                    <a href="{{ portfolio.get_absolute_url }}" class="card h-100 text-decoration-none text-reset">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h2 class="h5 fw-bold mb-0">{{ portfolio.name }}</h2>
+                                <span class="badge text-bg-light border">{{ portfolio.get_strategy_display }}</span>
+                            </div>
+                            <div class="stat-label mt-3">Total value</div>
+                            <div class="stat-value">{{ portfolio.total_value|floatformat:"2g" }}</div>
+                            {% with pl=portfolio.total_profit_loss %}
+                                <div class="small {% if pl >= 0 %}text-profit{% else %}text-loss{% endif %}">
+                                    {% if pl >= 0 %}+{% endif %}{{ pl|floatformat:"2g" }} P/L
+                                </div>
+                            {% endwith %}
+                            <hr>
+                            <div class="d-flex justify-content-between small text-secondary">
+                                <span>{{ portfolio.holdings.all|length }} holding{{ portfolio.holdings.all|length|pluralize }}</span>
+                                <span>Cash: {{ portfolio.cash_balance|floatformat:"2g" }}</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card card-body text-center text-secondary py-5">
+            <i class="bi bi-briefcase fs-1 mb-2"></i>
+            You don't have any portfolios yet.
+        </div>
+    {% endif %}
+{% endblock %}

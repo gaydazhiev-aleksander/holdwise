@@ -14,8 +14,7 @@
                     <a class="nav-link {% if url_name == 'home' %}active{% endif %}" href="{% url 'common:home' %}">Dashboard</a>
                 </li>
                 <li class="nav-item">
-                    {# TODO step 9: replace # with {% url 'portfolios:list' %} #}
-                    <a class="nav-link {% if app == 'portfolios' %}active{% endif %}" href="#">Portfolios</a>
+                    <a class="nav-link {% if app == 'portfolios' %}active{% endif %}" href="{% url 'portfolios:list' %}">Portfolios</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {% if app == 'assets' %}active{% endif %}" href="{% url 'assets:list' %}">Assets</a>

@@ -6,5 +6,6 @@ from assets.views import AssetListView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('assets/', include('assets.urls')),
+    path('portfolios/', include('portfolios.urls')),
     path('', include('common.urls')),
 ]
