@@ -46,7 +46,7 @@
                     <tbody>
                         {% for asset in assets %}
                             <tr>
-                                <td class="fw-semibold">{{ asset.ticker }}</td>
+                                <td class="fw-semibold"><a href="{% url 'assets:detail' ticker=asset.ticker %}" class="text-decoration-none">{{ asset.ticker }}</a></td>
                                 <td>{{ asset.name|truncatechars:40 }}</td>
                                 <td><span class="badge text-bg-secondary">{{ asset.get_asset_type_display }}</span></td>
                                 <td>{{ asset.sector|default:"—" }}</td>

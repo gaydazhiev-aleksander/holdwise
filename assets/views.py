@@ -1,6 +1,7 @@
 from django.db.models import Q
-from django.views.generic import ListView
+from django.views.generic import DetailView, ListView
 
+import assets
 from .forms import AssetFilterForm
 from .models import Asset
 
@@ -33,3 +34,16 @@ class AssetListView(ListView):
         context = super().get_context_data(**kwargs)
         context['form'] = self.form or AssetFilterForm()
         return context
+
+
+class AssetDetailView(DetailView):
+    model = Asset
+    template_name = 'assets/asset_detail.html'
+    context_object_name = 'asset'
+    slug_field = 'ticker'
+    slug_url_kwarg = 'ticker'
+
+    def get_object(self, queryset=None):
+        asset = super().get_object(queryset)
+        asset.refresh_price()
+        return asset
