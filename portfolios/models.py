@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.core.validators import MinLengthValidator, MinValueValidator
 from django.db import models
+from django.urls import reverse
 
 from .choices import MovementType, Strategy
 
@@ -28,6 +29,9 @@ class Portfolio(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('portfolios:detail', kwargs={'pk': self.pk})
 
     @property
     def cash_balance(self):

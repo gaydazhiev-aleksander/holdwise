@@ -25,9 +25,9 @@ body {
 }
 
 .text-profit {
-    color: var(--hw-profit);
+    color: var(--hw-profit) !important;
 }
 
 .text-loss {
-    color: var(--hw-loss);
+    color: var(--hw-loss) !important;
 }

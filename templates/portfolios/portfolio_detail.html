@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ portfolio.name }}{% endblock %}
+
+{% block content %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'portfolios:list' %}">Portfolios</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ portfolio.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-4">
+        <div>
+            <h1 class="h3 fw-bold mb-1">
+                {{ portfolio.name }}
+                <span class="badge text-bg-light border fs-6 align-middle">{{ portfolio.get_strategy_display }}</span>
+            </h1>
+            {% if portfolio.description %}
+                <div class="text-secondary">{{ portfolio.description|linebreaksbr }}</div>
+            {% endif %}
+        </div>
+            <div class="d-flex gap-2">
+            <a href="{% url 'portfolios:edit' pk=portfolio.pk %}" class="btn btn-outline-dark"><i class="bi bi-pencil me-1"></i>Edit</a>
+            <a href="{% url 'portfolios:delete' pk=portfolio.pk %}" class="btn btn-outline-danger"><i class="bi bi-trash me-1"></i>Delete</a>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="card h-100"><div class="card-body">
+                <div class="stat-label">Total value</div>
+                <div class="stat-value">{{ portfolio.total_value|floatformat:"2g" }}</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card h-100"><div class="card-body">
+                <div class="stat-label">Holdings</div>
+                <div class="stat-value">{{ portfolio.holdings_value|floatformat:"2g" }}</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card h-100"><div class="card-body">
+                <div class="stat-label">Cash</div>
+                <div class="stat-value">{{ portfolio.cash_balance|floatformat:"2g" }}</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card h-100"><div class="card-body">
+                <div class="stat-label">Profit / loss</div>
+                {% with pl=portfolio.total_profit_loss %}
+                    <div class="stat-value {% if pl >= 0 %}text-profit{% else %}text-loss{% endif %}">
+                        {% if pl >= 0 %}+{% endif %}{{ pl|floatformat:"2g" }}
+                    </div>
+                {% endwith %}
+            </div></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <span class="fw-semibold">Holdings</span>
+            {# step 10: "Add holding" button goes here #}
+        </div>
+        {% with holdings=portfolio.holdings.all %}
+            {% if holdings %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Ticker</th>
+                                <th>Name</th>
+                                <th class="text-end">Shares</th>
+                                <th class="text-end">Avg. buy</th>
+                                <th class="text-end">Price</th>
+                                <th class="text-end">Value</th>
+                                <th class="text-end">P/L</th>
+                                <th class="text-end">P/L %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for holding in holdings %}
+                                <tr>
+                                    <td class="fw-semibold">
+                                        <a href="{% url 'assets:detail' ticker=holding.asset.ticker %}" class="text-decoration-none">{{ holding.asset.ticker }}</a>
+                                    </td>
+                                    <td>{{ holding.asset.name|truncatechars:30 }}</td>
+                                    <td class="text-end">{{ holding.shares|floatformat:"-6" }}</td>
+                                    <td class="text-end">{{ holding.average_buy_price|floatformat:"2g" }}</td>
+                                    <td class="text-end">
+                                        {% if holding.asset.last_price is not None %}
+                                            {{ holding.asset.last_price|floatformat:"2g" }}
+                                        {% else %}
+                                            <span class="text-secondary">—</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">{{ holding.current_value|floatformat:"2g"|default:"—" }}</td>
+                                    {% if holding.profit_loss is not None %}
+                                        <td class="text-end">
+                                            <span class="{% if holding.profit_loss >= 0 %}text-profit{% else %}text-loss{% endif %}">
+                                                {% if holding.profit_loss >= 0 %}+{% endif %}{{ holding.profit_loss|floatformat:"2g" }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="{% if holding.profit_loss >= 0 %}text-profit{% else %}text-loss{% endif %}">
+                                                {% if holding.profit_loss >= 0 %}+{% endif %}{{ holding.profit_loss_percent|floatformat:2 }}%
+                                            </span>
+                                        </td>
+                                    {% else %}
+                                        <td class="text-end text-secondary">—</td>
+                                        <td class="text-end text-secondary">—</td>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="card-body text-secondary">No holdings in this portfolio yet.</div>
+            {% endif %}
+        {% endwith %}
+    </div>
+{% endblock %}

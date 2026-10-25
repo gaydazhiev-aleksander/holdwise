@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if form.instance.pk %}Edit {{ form.instance.name }}{% else %}New portfolio{% endif %}{% endblock %}
+
+{% block content %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'portfolios:list' %}">Portfolios</a></li>
+            {% if form.instance.pk %}
+                <li class="breadcrumb-item"><a href="{{ form.instance.get_absolute_url }}">{{ form.instance.name }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Edit</li>
+            {% else %}
+                <li class="breadcrumb-item active" aria-current="page">New</li>
+            {% endif %}
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card">
+                <div class="card-body p-4">
+                    <h1 class="h4 fw-bold mb-4">
+                        {% if form.instance.pk %}Edit portfolio{% else %}New portfolio{% endif %}
+                    </h1>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {% include 'partials/form_fields.html' %}
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-dark">
+                                <i class="bi bi-check-lg me-1"></i>{% if form.instance.pk %}Save changes{% else %}Create portfolio{% endif %}
+                            </button>
+                            <a href="{% if form.instance.pk %}{{ form.instance.get_absolute_url }}{% else %}{% url 'portfolios:list' %}{% endif %}"
+                               class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

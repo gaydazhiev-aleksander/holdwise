@@ -1,0 +1,13 @@
+from django.urls import path
+
+from .views import PortfolioDetailView, PortfolioListView, PortfolioCreateView, PortfolioUpdateView, PortfolioDeleteView
+
+app_name = 'portfolios'
+
+urlpatterns = [
+    path('', PortfolioListView.as_view(), name='list'),
+    path('create/', PortfolioCreateView.as_view(), name='create'),
+    path('<int:pk>/', PortfolioDetailView.as_view(), name='detail'),
+    path('<int:pk>/update/', PortfolioUpdateView.as_view(), name='edit'),
+    path('<int:pk>/delete/', PortfolioDeleteView.as_view(), name='delete'),
+]
