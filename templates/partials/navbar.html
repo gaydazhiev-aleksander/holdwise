@@ -1,0 +1,35 @@
+{% with app=request.resolver_match.app_name url_name=request.resolver_match.url_name %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="{% url 'common:home' %}">
+            <i class="bi bi-graph-up-arrow me-1"></i>Holdwise
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link {% if url_name == 'home' %}active{% endif %}" href="{% url 'common:home' %}">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    {# TODO step 9: replace # with {% url 'portfolios:list' %} #}
+                    <a class="nav-link {% if app == 'portfolios' %}active{% endif %}" href="#">Portfolios</a>
+                </li>
+                <li class="nav-item">
+                    {# TODO step 8: replace # with {% url 'assets:list' %} #}
+                    <a class="nav-link {% if app == 'assets' %}active{% endif %}" href="#">Assets</a>
+                </li>
+                <li class="nav-item">
+                    {# TODO step 12: replace # with {% url 'watchlists:list' %} #}
+                    <a class="nav-link {% if app == 'watchlists' %}active{% endif %}" href="#">Watchlists</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if url_name == 'about' %}active{% endif %}" href="{% url 'common:about' %}">About</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+{% endwith %}
