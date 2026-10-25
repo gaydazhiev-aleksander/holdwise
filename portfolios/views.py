@@ -1,5 +1,6 @@
 from django.contrib.messages.views import SuccessMessageMixin
-from django.views.generic import CreateView, DetailView, ListView, UpdateView
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, DetailView, ListView, UpdateView, DeleteView
 
 from .forms import PortfolioForm
 from .models import Portfolio
@@ -35,3 +36,13 @@ class PortfolioUpdateView(SuccessMessageMixin, UpdateView):
     form_class = PortfolioForm
     template_name = 'portfolios/portfolio_form.html'
     success_message = 'Portfolio "%(name)s" was updated.'
+
+
+class PortfolioDeleteView(SuccessMessageMixin, DeleteView):
+    model = Portfolio
+    template_name = 'portfolios/portfolio_confirm_delete.html'
+    context_object_name = 'portfolio'
+    success_url = reverse_lazy('portfolios:list')
+
+    def get_success_message(self, cleaned_data):
+        return f'Portfolio "{self.object.name}" was deleted'

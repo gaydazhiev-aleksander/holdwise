@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete {{ portfolio.name }}{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-danger">
+                <div class="card-body p-4">
+                    <h1 class="h4 fw-bold text-danger mb-3">
+                        <i class="bi bi-exclamation-triangle me-1"></i>Delete "{{ portfolio.name }}"?
+                    </h1>
+                    <p>This will permanently delete the portfolio together with:</p>
+                    <ul>
+                        <li>{{ portfolio.holdings.count }} holding{{ portfolio.holdings.count|pluralize }}</li>
+                        <li>{{ portfolio.cash_movements.count }} cash movement{{ portfolio.cash_movements.count|pluralize }}</li>
+                    </ul>
+                    <p class="text-secondary small">The assets themselves stay in the app. This cannot be undone.</p>
+
+                    <form method="post" class="d-flex gap-2 mt-4">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Yes, delete it</button>
+                        <a href="{{ portfolio.get_absolute_url }}" class="btn btn-outline-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
