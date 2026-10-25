@@ -24,3 +24,8 @@ class Watchlist(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def assets_count(self):
+        """Number of assets in this watchlist"""
+        return self.assets.count()
