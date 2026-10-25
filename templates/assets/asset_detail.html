@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ asset.ticker }}{% endblock %}
+
+{% block content %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'assets:list' %}">Assets</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ asset.ticker }}</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-4">
+        <div>
+            <h1 class="h3 fw-bold mb-1">
+                {{ asset.ticker }}
+                <span class="badge text-bg-secondary fs-6 align-middle">{{ asset.get_asset_type_display }}</span>
+            </h1>
+            <div class="text-secondary">{{ asset.name }}{% if asset.sector %} · {{ asset.sector }}{% endif %}</div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="stat-label">Last price</div>
+                    <div class="stat-value">
+                        {% if asset.last_price is not None %}
+                            {{ asset.last_price|floatformat:2 }} <span class="fs-6 text-secondary">{{ asset.currency }}</span>
+                        {% else %}
+                            <span class="text-secondary">Unavailable</span>
+                        {% endif %}
+                    </div>
+                    <div class="small text-secondary mt-1">
+                        {% if asset.price_updated_at %}
+                            Updated {{ asset.price_updated_at|timesince }} ago
+                        {% else %}
+                            Never updated
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="stat-label">Held in</div>
+                    <div class="stat-value">{{ asset.holdings.count }}</div>
+                    <div class="small text-secondary mt-1">portfolio{{ asset.holdings.count|pluralize }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="stat-label">Watched in</div>
+                    <div class="stat-value">{{ asset.watchlists.count }}</div>
+                    <div class="small text-secondary mt-1">watchlist{{ asset.watchlists.count|pluralize }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-white fw-semibold">Holdings</div>
+        {% with holdings=asset.holdings.all %}
+            {% if holdings %}
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Portfolio</th>
+                                <th class="text-end">Shares</th>
+                                <th class="text-end">Avg. buy price</th>
+                                <th class="text-end">Value</th>
+                                <th class="text-end">Profit / loss</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for holding in holdings %}
+                                <tr>
+                                    <td>{{ holding.portfolio.name }}</td>
+                                    <td class="text-end">{{ holding.shares|floatformat:"-6" }}</td>
+                                    <td class="text-end">{{ holding.average_buy_price|floatformat:2 }}</td>
+                                    <td class="text-end">{{ holding.current_value|floatformat:2|default:"—" }}</td>
+                                    <td class="text-end">
+                                        {% if holding.profit_loss is not None %}
+                                            <span class="{% if holding.profit_loss >= 0 %}text-profit{% else %}text-loss{% endif %}">
+                                                {{ holding.profit_loss|floatformat:2 }} ({{ holding.profit_loss_percent|floatformat:2 }}%)
+                                            </span>
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="card-body text-secondary">This asset is not in any portfolio yet.</div>
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-white fw-semibold">Watchlists</div>
+        <div class="card-body">
+            {% for watchlist in asset.watchlists.all %}
+                <span class="badge text-bg-light border me-1">{{ watchlist.name }}</span>
+            {% empty %}
+                <span class="text-secondary">This asset is not on any watchlist yet.</span>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
