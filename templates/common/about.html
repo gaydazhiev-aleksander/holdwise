@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}About{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body p-4">
+                    <h1 class="h3 fw-bold mb-3">About Holdwise</h1>
+                    <p>
+                        Holdwise is a personal investment portfolio tracker. Create portfolios, add holdings by
+                        ticker symbol and see what each position is worth today, how much you have gained or lost,
+                        and how your money is spread across your investments.
+                    </p>
+                    <h2 class="h5 fw-semibold mt-4">Features</h2>
+                    <ul>
+                        <li>Live prices for stocks, ETFs and crypto from Yahoo Finance</li>
+                        <li>Profit and loss per holding and per portfolio</li>
+                        <li>A cash reserve per portfolio: deposits, withdrawals and sale proceeds</li>
+                        <li>Watchlists for assets you are keeping an eye on</li>
+                    </ul>
+                    <p class="text-secondary small mb-0">
+                        Prices may be delayed. Holdwise is a tracking tool, not investment advice.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
