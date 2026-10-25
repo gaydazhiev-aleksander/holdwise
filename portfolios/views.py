@@ -1,5 +1,7 @@
-from django.views.generic import DetailView, ListView
+from django.contrib.messages.views import SuccessMessageMixin
+from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
+from .forms import PortfolioForm
 from .models import Portfolio
 
 
@@ -19,3 +21,17 @@ class PortfolioDetailView(DetailView):
         for holding in portfolio.holdings.all():
             holding.asset.refresh_price()
         return portfolio
+
+
+class PortfolioCreateView(SuccessMessageMixin, CreateView):
+    model = Portfolio
+    form_class = PortfolioForm
+    template_name = 'portfolios/portfolio_form.html'
+    success_message = 'Portfolio "%(name)s" was created.'
+
+
+class PortfolioUpdateView(SuccessMessageMixin, UpdateView):
+    model = Portfolio
+    form_class = PortfolioForm
+    template_name = 'portfolios/portfolio_form.html'
+    success_message = 'Portfolio "%(name)s" was updated.'
