@@ -18,8 +18,7 @@
                     <a class="nav-link {% if app == 'portfolios' %}active{% endif %}" href="#">Portfolios</a>
                 </li>
                 <li class="nav-item">
-                    {# TODO step 8: replace # with {% url 'assets:list' %} #}
-                    <a class="nav-link {% if app == 'assets' %}active{% endif %}" href="#">Assets</a>
+                    <a class="nav-link {% if app == 'assets' %}active{% endif %}" href="{% url 'assets:list' %}">Assets</a>
                 </li>
                 <li class="nav-item">
                     {# TODO step 12: replace # with {% url 'watchlists:list' %} #}
