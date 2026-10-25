@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+    <div class="p-5 mb-4 bg-white rounded-3 shadow-sm">
+        <h1 class="display-6 fw-bold"><i class="bi bi-graph-up-arrow text-success me-2"></i>Welcome to Holdwise</h1>
+        <p class="lead text-secondary mb-0">
+            Track your investment portfolios with live prices, profit and loss, and a cash reserve, all in one place.
+        </p>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="stat-label">Portfolios</div>
+                    <p class="mb-0 mt-2 text-secondary">Create portfolios and add holdings by ticker.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="stat-label">Live prices</div>
+                    <p class="mb-0 mt-2 text-secondary">Prices are fetched from Yahoo Finance automatically.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="stat-label">Watchlists</div>
+                    <p class="mb-0 mt-2 text-secondary">Keep an eye on assets you don't own yet.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
