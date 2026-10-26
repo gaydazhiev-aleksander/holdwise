@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from django.db import models
+from django.db import IntegrityError, models, transaction
 from django.db.models import Count, DecimalField, ExpressionWrapper, F, Sum, Value
 from django.utils import timezone
 
@@ -98,8 +98,14 @@ class AssetManager(models.Manager.from_queryset(AssetQuerySet)):
 
         service = service or MarketDataService()
         details = service.fetch_asset_details(ticker)
-        return self.create(
-            ticker=ticker,
-            price_updated_at=timezone.now(),
-            **details,
-        )
+
+        try:
+            with transaction.atomic():
+                return self.create(
+                    ticker=ticker,
+                    price_updated_at=timezone.now(),
+                    **details,
+                )
+        except IntegrityError:
+            return self.get(ticker=ticker)
+
