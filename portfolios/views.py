@@ -1,15 +1,12 @@
 import csv
 
-from unittest import result
-
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
-from django.shortcuts import get_object_or_404, redirect
-from django.template.base import kwarg_re
-from django.urls import reverse_lazy
-from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, UpdateView, View
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse_lazy
 from django.utils.text import slugify
+from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, UpdateView, View
 
 from .forms import AddHoldingForm, CashMovementForm, HoldingForm, PortfolioForm, SellHoldingForm
 from .models import CashMovement, Holding, Portfolio

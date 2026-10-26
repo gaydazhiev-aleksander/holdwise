@@ -1,12 +1,8 @@
-import re
 from decimal import Decimal
 
 from django import forms
 
-from assets.exceptions import MarketDataError
 from assets.forms import TickerLookupForm
-from assets.models import Asset
-
 from .choices import MovementType
 from .models import CashMovement, Holding, Portfolio
 

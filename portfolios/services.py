@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from decimal import Decimal
 
 from django.db import transaction
-from django.db.models import Model
 
 from .choices import MovementType
 from .models import CashMovement, Holding
