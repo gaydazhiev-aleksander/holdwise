@@ -6,7 +6,7 @@ from django import forms
 from assets.exceptions import MarketDataError
 from assets.models import Asset
 
-from .models import Portfolio
+from .models import Holding, Portfolio
 
 
 class PortfolioForm(forms.ModelForm):
@@ -119,3 +119,32 @@ class AddHoldingForm(forms.Form):
 
         return cleaned_data
 
+
+class HoldingForm(forms.ModelForm):
+    class Meta:
+        model = Holding
+        fields = ['asset', 'shares', 'average_buy_price']
+        labels = {
+            'asset': 'Asset',
+            'shares': 'Number of shares',
+            'average_buy_price': 'Average buy price',
+        }
+        help_texts = {
+            'average_buy_price': 'Price per share, editting this does not change your cash',
+        }
+        widgets = {
+            'asset': forms.Select(attrs={'class': 'form-select'}),
+            'shares': forms.NumberInput(attrs={
+                'step': 'any',
+                'class': 'form-control',
+            }),
+            'average_buy_price': forms.NumberInput(attrs={
+                'step': 'any',
+                'class': 'form-control',
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['asset'].disabled = True
+        self.fields['asset'].help_text = ('The asset cant be changed, delete this holding and add a new one instead')
