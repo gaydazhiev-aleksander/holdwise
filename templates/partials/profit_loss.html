@@ -1,0 +1,1 @@
+{% load holdwise_tags %}{% if amount is None %}<span class="text-secondary">—</span>{% else %}<span class="{{ amount|pl_class }}">{% if amount >= 0 %}+{% endif %}{{ amount|money }}{% if percent is not None %} ({{ percent|signed_percent }}){% endif %}</span>{% endif %}
