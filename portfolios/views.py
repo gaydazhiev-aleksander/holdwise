@@ -7,8 +7,8 @@ from django.template.base import kwarg_re
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, UpdateView
 
-from .forms import AddHoldingForm, HoldingForm, PortfolioForm, SellHoldingForm
-from .models import Portfolio, Holding
+from .forms import AddHoldingForm, CashMovementForm, HoldingForm, PortfolioForm, SellHoldingForm
+from .models import CashMovement, Holding, Portfolio
 from .services import HoldingService
 
 
@@ -152,3 +152,50 @@ class HoldingSellView(FormView):
         )
         return redirect(portfolio)
 
+
+class CashMovementCreateView(CreateView):
+    model = CashMovement
+    form_class = CashMovementForm
+    template_name = 'portfolios/cash_form.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.portfolio = get_object_or_404(Portfolio, pk=kwargs['pk'])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['portfolio'] = self.portfolio
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['portfolio'] = self.portfolio
+        return context
+
+    def form_valid(self, form):
+        form.instance.portfolio = self.portfolio
+        response = super().form_valid(form)
+        messages.success(
+            self.request,
+            f'{self.object.get_movement_type_display()} of {self.object.amount:,.2f} recorded '
+            f'Cash balance: {self.portfolio.cash_balance:,.2f}',
+        )
+        return response
+
+    def get_success_url(self):
+        return self.portfolio.get_absolute_url()
+
+
+class CashMovementListView(ListView):
+    template_name = 'portfolios/cash_history.html'
+    context_object_name = 'movements'
+    paginate_by = 15
+
+    def get_queryset(self):
+        self.portfolio = get_object_or_404(Portfolio, pk=self.kwargs['pk'])
+        return self.portfolio.cash_movements.all()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['portfolio'] = self.portfolio
+        return context
