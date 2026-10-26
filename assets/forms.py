@@ -5,10 +5,11 @@ from .choices import AssetType
 
 class AssetFilterForm(forms.Form):
     SORT_CHOICES = [
+        ('-market_value', 'Value (high to low)'),
+        ('-profit_loss_percent', 'P/L % (best first)'),
+        ('profit_loss_percent', 'P/L % (worst first)'),
         ('ticker', 'Ticker (A-Z)'),
         ('name', 'Name (A-Z)'),
-        ('-last_price', 'Price (high to low)'),
-        ('last_price', 'Price (low to high)'),
     ]
 
     q = forms.CharField(
