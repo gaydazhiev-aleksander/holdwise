@@ -4,6 +4,9 @@
     {% if portfolio %}
         <input type="hidden" name="portfolio" value="{{ portfolio.pk }}">
     {% endif %}
+    {% if watchlist %}
+        <input type="hidden" name="watchlist" value="{{ watchlist.pk }}">
+    {% endif %}
     <button type="submit" class="btn btn-outline-dark">
         <i class="bi bi-arrow-clockwise me-1"></i>Refresh prices
     </button>

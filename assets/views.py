@@ -55,23 +55,28 @@ class RefreshPricesView(View):
     http_method_names = ['post']
 
     def post(self, request):
-        assets = Asset.objects.owned()
         portfolio_id = request.POST.get('portfolio')
-        if portfolio_id:
-            assets = assets.filter(holdings__portfolio_id=portfolio_id)
+        watchlist_id = request.POST.get('watchlist')
 
-        refreshed, already_refreshed, failed = assets.refresh_prices()
+        if portfolio_id:
+            assets = Asset.objects.owned().filter(holdings__portfolio_id=portfolio_id)
+        elif watchlist_id:
+            assets = Asset.objects.filter(watchlists__pk=watchlist_id)
+        else:
+            assets = Asset.objects.owned()
+
+        refreshed, already_fresh, failed = assets.refresh_prices()
 
         if failed:
             messages.warning(
                 request,
-                f'Updated {refreshed} price(s). {failed} could not be refreshed. '
+                f'Updated {refreshed} price(s) {failed} couldnt be refreshed '
                 f'Yahoo Finance may be unavailable.',
             )
         elif refreshed:
-            messages.success(request, f'Updated {refreshed} price(s).')
+            messages.success(request, f'Updated {refreshed} price(s)')
         else:
-            messages.info(request, f'All prices are already refreshed.')
+            messages.info(request, 'All prices are already up to date')
 
         next_url = request.POST.get('next')
         if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
