@@ -60,7 +60,7 @@
     <div class="card">
         <div class="card-header bg-white d-flex justify-content-between align-items-center">
             <span class="fw-semibold">Holdings</span>
-            {# step 10: "Add holding" button goes here #}
+                        <a href="{% url 'portfolios:holding-add' pk=portfolio.pk %}" class="btn btn-sm btn-dark"><i class="bi bi-plus-lg me-1"></i>Add holding</a>
         </div>
         {% with holdings=portfolio.holdings.all %}
             {% if holdings %}

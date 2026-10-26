@@ -1,9 +1,12 @@
+from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DetailView, ListView, UpdateView, DeleteView
+from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, UpdateView
 
-from .forms import PortfolioForm
-from .models import Portfolio
+from .forms import AddHoldingForm, PortfolioForm
+from .models import Portfolio, Holding
+from .services import HoldingService
 
 
 class PortfolioListView(ListView):
@@ -46,3 +49,36 @@ class PortfolioDeleteView(SuccessMessageMixin, DeleteView):
 
     def get_success_message(self, cleaned_data):
         return f'Portfolio "{self.object.name}" was deleted'
+
+
+class HoldingCreateView(FormView):
+    form_class = AddHoldingForm
+    template_name = 'portfolios/holding_form.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.portfolio = get_object_or_404(Portfolio, pk=kwargs['pk'])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['portfolio'] = self.portfolio
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['portfolio'] = self.portfolio
+        return context
+
+    def form_valid(self, form):
+        holding = HoldingService().buy(
+            self.portfolio,
+            form.asset,
+            form.cleaned_data['shares'],
+            form.cleaned_data['price'],
+            pay_from_cash=form.cleaned_data['pay_from_cash'],
+        )
+        messages.success(
+            self.request,
+            f'Added {form.cleaned_data["shares"]} {form.asset.ticker}, you now hold {holding.shares} shares',
+        )
+        return redirect(self.portfolio)

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Add holding · {{ portfolio.name }}{% endblock %}
+
+{% block content %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'portfolios:list' %}">Portfolios</a></li>
+            <li class="breadcrumb-item"><a href="{{ portfolio.get_absolute_url }}">{{ portfolio.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Add holding</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card">
+                <div class="card-body p-4">
+                    <h1 class="h4 fw-bold mb-1">Add holding</h1>
+                    <p class="text-secondary mb-4">
+                        to <strong>{{ portfolio.name }}</strong>. If you already hold this ticker here, the shares are
+                        merged and the average buy price is recalculated.
+                    </p>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {% include 'partials/form_fields.html' %}
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-dark"><i class="bi bi-plus-lg me-1"></i>Add holding</button>
+                            <a href="{{ portfolio.get_absolute_url }}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
