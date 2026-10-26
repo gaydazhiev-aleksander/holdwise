@@ -16,6 +16,7 @@ Django Basics Regular Exam project @ SoftUni.
   - **Sell** part or all of a position; the proceeds are added to the cash reserve and the realised profit/loss is shown.
   - Edit (asset is read-only) or remove a holding.
 - **Cash reserve** – deposit and withdraw cash, and see the full cash history (deposits, withdrawals, purchases and sale proceeds).
+- **CSV export** – download a portfolio's holdings (shares, average buy price, last price, cost basis, market value, profit/loss and P/L %) plus its cash balance as a CSV file that opens in Excel or Google Sheets.
 - **Assets overview** – everything you own combined across all portfolios: total shares, average cost, market value, profit/loss and P/L %, with portfolio-wide totals. Search, filter by type and sort by value or performance.
 - **Asset detail** – live price, which portfolios hold the asset and which watchlists it is on.
 - **Watchlists** – lists of assets you are keeping an eye on (including ones you do not own). Add assets by ticker and remove them again.
@@ -102,8 +103,9 @@ Then open any unknown URL, e.g. http://127.0.0.1:8000/does-not-exist/. To turn d
 3. **Add holding** – enter `AAPL`, a number of shares and a buy price. Tick **Pay from cash reserve** to pay with the deposited cash.
 4. Add `AAPL` again – the holding is merged and the average buy price recalculated.
 5. **Sell** part of the position – the proceeds appear in the cash balance and in the **cash history**.
-6. Open **Assets** to see everything you own combined, and the **Dashboard** for the overall picture.
-7. **Watchlists → New watchlist**, then **Add asset** – e.g. `TSLA` – to watch an asset you do not own.
+6. Click **Export CSV** on the portfolio page to download its holdings.
+7. Open **Assets** to see everything you own combined, and the **Dashboard** for the overall picture.
+8. **Watchlists → New watchlist**, then **Add asset** – e.g. `TSLA` – to watch an asset you do not own.
 
 ---
 
@@ -168,6 +170,8 @@ Design decisions:
 - **Dependency injection** – `refresh_price()` and `get_or_fetch()` accept an optional service, keeping the model loosely coupled to the data source.
 - **Form inheritance** – `TickerLookupForm` holds the shared ticker validation and lookup. `AddHoldingForm` and `AddToWatchlistForm` inherit from it; `AddToWatchlistForm` overrides `clean_ticker()` and calls `super()` to add a duplicate check.
 - **Safe redirects** – the refresh endpoint only redirects to URLs on the same host (`url_has_allowed_host_and_scheme`), preventing open redirects.
+- **Race-safe asset creation** – if two requests try to create the same ticker at the same moment (e.g. a double-clicked form), `get_or_fetch()` catches the `IntegrityError` inside `transaction.atomic()` and returns the asset created by the other request.
+- **CSV export** – `PortfolioExportView` streams the holdings into an `HttpResponse` with Python's `csv` module, using a `Content-Disposition: attachment` header and a `slugify`-based filename.
 
 ---
 
@@ -201,6 +205,7 @@ All forms use custom labels, help texts, placeholders and user-friendly error me
 | `/portfolios/<id>/` | Portfolio detail |
 | `/portfolios/<id>/edit/` | Edit portfolio |
 | `/portfolios/<id>/delete/` | Delete portfolio (confirmation) |
+| `/portfolios/<id>/export/` | Download holdings as CSV |
 | `/portfolios/<id>/holdings/add/` | Add holding |
 | `/portfolios/holdings/<id>/edit/` | Edit holding |
 | `/portfolios/holdings/<id>/sell/` | Sell holding |
