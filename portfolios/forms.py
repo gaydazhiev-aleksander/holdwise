@@ -148,3 +148,44 @@ class HoldingForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['asset'].disabled = True
         self.fields['asset'].help_text = ('The asset cant be changed, delete this holding and add a new one instead')
+
+
+class SellHoldingForm(forms.Form):
+    shares = forms.DecimalField(
+        max_digits=18,
+        decimal_places=6,
+        min_value=Decimal('0.000001'),
+        label='Shares to sell',
+        error_messages={'min_value': 'Shares must be greater than 0.'},
+        widget=forms.NumberInput(attrs={
+            'step': 'any',
+            'class': 'form-control',
+        }),
+    )
+    price = forms.DecimalField(
+        max_digits=14,
+        decimal_places=4,
+        min_value=Decimal('0.0001'),
+        label='Sell price per share',
+        help_text='Pre-filled with the latest market price',
+        error_messages={'min_value': 'Price must be greater than 0.'},
+        widget=forms.NumberInput(attrs={
+            'step': 'any',
+            'class': 'form-control',
+        }),
+    )
+
+    def __init__(self, *args, holding, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.holding = holding
+        self.fields['shares'].help_text = f'You hold {holding.shares.normalize():f} shares'
+
+    def clean_shares(self):
+        shares = self.cleaned_data['shares']
+
+        if shares > self.holding.shares:
+            raise forms.ValidationError(
+                f'You only hold {self.holding.shares.normalize():f} shares of {self.holding.asset.ticker}'
+            )
+
+        return shares

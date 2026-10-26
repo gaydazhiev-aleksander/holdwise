@@ -1,10 +1,13 @@
+from unittest import result
+
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import get_object_or_404, redirect
+from django.template.base import kwarg_re
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, UpdateView
 
-from .forms import AddHoldingForm, HoldingForm, PortfolioForm
+from .forms import AddHoldingForm, HoldingForm, PortfolioForm, SellHoldingForm
 from .models import Portfolio, Holding
 from .services import HoldingService
 
@@ -107,3 +110,45 @@ class HoldingDeleteView(SuccessMessageMixin, DeleteView):
 
     def get_success_message(self, cleaned_data):
         return f'{self.object.asset.ticker} was removed from {self.object.portfolio.name}'
+
+
+class HoldingSellView(FormView):
+    form_class = SellHoldingForm
+    template_name = 'portfolios/holding_sell.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.holding = get_object_or_404(
+            Holding.objects.select_related('asset', 'portfolio'),
+            pk=kwargs['pk'],
+        )
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial['price'] = self.holding.asset.last_price
+        return initial
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['holding'] = self.holding
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['holding'] = self.holding
+        return context
+
+    def form_valid(self, form):
+        shares = form.cleaned_data['shares']
+        price = form.cleaned_data['price']
+        result = HoldingService().sell(self.holding, shares, price)
+        portfolio = self.holding.portfolio
+
+        messages.success(
+            self.request,
+            f'Sold {shares.normalize():f} {self.holding.asset.ticker} at {price:,.2f} '
+            f'for {result.proceeds:,.2f} (profit/loss: {result.profit_loss:+,.2f}) '
+            f'Cash balance: {portfolio.cash_balance:,.2f}.',
+        )
+        return redirect(portfolio)
+

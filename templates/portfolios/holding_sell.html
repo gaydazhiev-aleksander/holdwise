@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Sell {{ holding.asset.ticker }} · {{ holding.portfolio.name }}{% endblock %}
+
+{% block content %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'portfolios:list' %}">Portfolios</a></li>
+            <li class="breadcrumb-item"><a href="{{ holding.portfolio.get_absolute_url }}">{{ holding.portfolio.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Sell {{ holding.asset.ticker }}</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card">
+                <div class="card-body p-4">
+                    <h1 class="h4 fw-bold mb-1">Sell {{ holding.asset.ticker }}</h1>
+                    <p class="text-secondary mb-4">{{ holding.asset.name }}</p>
+
+                    <div class="row g-2 mb-4">
+                        <div class="col-4">
+                            <div class="stat-label">You hold</div>
+                            <div class="fw-semibold">{{ holding.shares|floatformat:"-6" }}</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-label">Avg. buy price</div>
+                            <div class="fw-semibold">{{ holding.average_buy_price|floatformat:"2g" }}</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-label">Market price</div>
+                            <div class="fw-semibold">{{ holding.asset.last_price|floatformat:"2g"|default:"—" }}</div>
+                        </div>
+                    </div>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {% include 'partials/form_fields.html' %}
+
+                        <div class="alert alert-light border small mt-3 mb-0">
+                            <i class="bi bi-cash-coin me-1"></i>
+                            The proceeds are added to this portfolio's cash. Selling all shares removes the holding.
+                        </div>
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-dark"><i class="bi bi-cash-coin me-1"></i>Sell</button>
+                            <a href="{{ holding.portfolio.get_absolute_url }}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
