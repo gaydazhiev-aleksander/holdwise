@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from .choices import AssetType
 from .exceptions import MarketDataError
+from .managers import AssetManager
 from .services import MarketDataService
 
 
@@ -44,6 +45,8 @@ class Asset(models.Model):
     price_updated_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    objects = AssetManager()
+
     class Meta:
         ordering = ['ticker']
 
@@ -52,7 +55,7 @@ class Asset(models.Model):
 
     @property
     def is_price_stale(self):
-        """True if the price was never fetched or is older than PRICE_MAX_AGE."""
+        """true if the price was never fetched or is older than PRICE_MAX_AGE"""
         return (
                 self.price_updated_at is None
                 or timezone.now() - self.price_updated_at > self.PRICE_MAX_AGE
@@ -60,9 +63,7 @@ class Asset(models.Model):
 
     def refresh_price(self, service=None):
         """Fetch a fresh price if the current one is stale.
-
-        Return True if the price is up to date afterwards, False if fetching failed.
-        """
+        return True if the price is up to date afterwards, False if fetching failed"""
         if not self.is_price_stale:
             return True
 
