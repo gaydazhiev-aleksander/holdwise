@@ -1,3 +1,5 @@
+import csv
+
 from unittest import result
 
 from django.contrib import messages
@@ -5,11 +7,19 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import get_object_or_404, redirect
 from django.template.base import kwarg_re
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, UpdateView
+from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, UpdateView, View
+from django.http import HttpResponse
+from django.utils.text import slugify
 
 from .forms import AddHoldingForm, CashMovementForm, HoldingForm, PortfolioForm, SellHoldingForm
 from .models import CashMovement, Holding, Portfolio
 from .services import HoldingService
+
+
+def _csv_number(value, places):
+    if value is None:
+        return ''
+    return f'{value:.{places}f}'
 
 
 class PortfolioListView(ListView):
@@ -199,3 +209,36 @@ class CashMovementListView(ListView):
         context = super().get_context_data(**kwargs)
         context['portfolio'] = self.portfolio
         return context
+
+
+class PortfolioExportView(View):
+    def get(self, request, pk):
+        portfolio = get_object_or_404(Portfolio.objects.prefetch_related('holdings__asset'), pk=pk)
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="{slugify(portfolio.name)}-holdings.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow([
+            'Ticker', 'Name', 'Type', 'Shares', 'Average buy price', 'Last price',
+            'Cost basis', 'Market value', 'Profit/loss', 'Profit/loss %',
+        ])
+
+        for holding in portfolio.holdings.all():
+            writer.writerow([
+                holding.asset.ticker,
+                holding.asset.name,
+                holding.asset.get_asset_type_display(),
+                _csv_number(holding.shares, 6),
+                _csv_number(holding.average_buy_price, 2),
+                _csv_number(holding.asset.last_price, 2),
+                _csv_number(holding.cost_basis, 2),
+                _csv_number(holding.current_value, 2),
+                _csv_number(holding.profit_loss, 2),
+                _csv_number(holding.profit_loss_percent, 2),
+            ])
+
+        writer.writerow([])
+        writer.writerow(['Cash', '', '', '', '', '', '', _csv_number(portfolio.cash_balance, 2)])
+
+        return response

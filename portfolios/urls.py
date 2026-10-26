@@ -12,6 +12,7 @@ from .views import (
     PortfolioDetailView,
     PortfolioListView,
     PortfolioUpdateView,
+    PortfolioExportView,
 )
 
 app_name = 'portfolios'
@@ -28,4 +29,5 @@ urlpatterns = [
     path('holdings/<int:pk>/edit/', HoldingUpdateView.as_view(), name='holding-edit'),
     path('holdings/<int:pk>/delete/', HoldingDeleteView.as_view(), name='holding-delete'),
     path('holdings/<int:pk>/sell/', HoldingSellView.as_view(), name='holding-sell'),
+    path('<int:pk>/export/', PortfolioExportView.as_view(), name='export'),
 ]
