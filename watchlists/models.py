@@ -1,5 +1,6 @@
 from django.core.validators import MinLengthValidator
 from django.db import models
+from django.urls import reverse
 
 
 class Watchlist(models.Model):
@@ -24,6 +25,9 @@ class Watchlist(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('watchlists:detail', kwargs={'pk': self.pk})
 
     @property
     def assets_count(self):
