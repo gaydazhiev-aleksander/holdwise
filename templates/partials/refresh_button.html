@@ -1,0 +1,10 @@
+<form method="post" action="{% url 'assets:refresh' %}" class="d-inline">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+    {% if portfolio %}
+        <input type="hidden" name="portfolio" value="{{ portfolio.pk }}">
+    {% endif %}
+    <button type="submit" class="btn btn-outline-dark">
+        <i class="bi bi-arrow-clockwise me-1"></i>Refresh prices
+    </button>
+</form>

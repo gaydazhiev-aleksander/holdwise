@@ -1,7 +1,10 @@
+from django.contrib import messages
 from django.db.models import Q
-from django.views.generic import DetailView, ListView
+from django.shortcuts import redirect
+from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.generic import DetailView, ListView, View
 
-import assets
 from .forms import AssetFilterForm
 from .models import Asset
 
@@ -46,3 +49,32 @@ class AssetDetailView(DetailView):
         asset = super().get_object(queryset)
         asset.refresh_price()
         return asset
+
+
+class RefreshPricesView(View):
+    http_method_names = ['post']
+
+    def post(self, request):
+        assets = Asset.objects.owned()
+        portfolio_id = request.POST.get('portfolio')
+        if portfolio_id:
+            assets = assets.filter(holdings__portfolio_id=portfolio_id)
+
+        refreshed, already_refreshed, failed = assets.refresh_prices()
+
+        if failed:
+            messages.warning(
+                request,
+                f'Updated {refreshed} price(s). {failed} could not be refreshed. '
+                f'Yahoo Finance may be unavailable.',
+            )
+        elif refreshed:
+            messages.success(request, f'Updated {refreshed} price(s).')
+        else:
+            messages.info(request, f'All prices are already refreshed.')
+
+        next_url = request.POST.get('next')
+        if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+            next_url = reverse('assets:list')
+
+        return redirect(next_url)
