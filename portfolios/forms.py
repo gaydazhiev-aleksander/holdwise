@@ -6,7 +6,8 @@ from django import forms
 from assets.exceptions import MarketDataError
 from assets.models import Asset
 
-from .models import Holding, Portfolio
+from .choices import MovementType
+from .models import CashMovement, Holding, Portfolio
 
 
 class PortfolioForm(forms.ModelForm):
@@ -189,3 +190,50 @@ class SellHoldingForm(forms.Form):
             )
 
         return shares
+
+
+class CashMovementForm(forms.ModelForm):
+    class Meta:
+        model = CashMovement
+        fields = ['movement_type', 'amount', 'note']
+        labels = {
+            'movement_type': 'Type',
+            'amount': 'Amount',
+            'note': 'Note',
+        }
+        help_texts = {
+            'note': 'Optional, eg. "Monthly savings"',
+        }
+        widgets = {
+            'movement_type': forms.RadioSelect(attrs={'class': 'form-check-input'}),
+            'amount': forms.NumberInput(attrs={
+                'step': '0.01',
+                'placeholder': '500.00',
+                'class': 'form-control',
+            }),
+            'note': forms.TextInput(attrs={
+                'placeholder': 'Optional',
+                'class': 'form-control',
+            }),
+        }
+
+    def __init__(self, *args, portfolio, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.portfolio = portfolio
+        self.fields['movement_type'].choices = [
+            (MovementType.DEPOSIT, MovementType.DEPOSIT.label),
+            (MovementType.WITHDRAWAL, MovementType.WITHDRAWAL.label),
+        ]
+        self.fields['amount'].help_text = f'Available cash: {portfolio.cash_balance:,.2f}'
+
+    def clean(self):
+        cleaned_data = super().clean()
+        movement_type = cleaned_data.get('movement_type')
+        amount = cleaned_data.get('amount')
+
+        if movement_type == MovementType.WITHDRAWAL and amount:
+            balance = self.portfolio.cash_balance
+            if amount > balance:
+                self.add_error('amount', f'You can only withdraw up to {balance:,.2f}.')
+
+        return cleaned_data
