@@ -1,5 +1,7 @@
 from django import forms
 
+from assets.forms import TickerLookupForm
+
 from .models import Watchlist
 
 
@@ -32,3 +34,17 @@ class WatchlistForm(forms.ModelForm):
             raise forms.ValidationError('Watchlist already exists')
 
         return name
+
+
+class AddToWatchlistForm(TickerLookupForm):
+    def __init__(self, *args, watchlist, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.watchlist = watchlist
+
+    def clean_ticker(self):
+        ticker = super().clean_ticker()
+
+        if self.watchlist.assets.filter(pk=self.asset.pk).exists():
+            raise forms.ValidationError(f'{ticker} is already on the watchlist')
+
+        return ticker

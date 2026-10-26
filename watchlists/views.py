@@ -1,9 +1,10 @@
-from django.shortcuts import render
+from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DetailView, DetailView, ListView, UpdateView, DeleteView
+from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, UpdateView, View
 
-from .forms import WatchlistForm
+from .forms import AddToWatchlistForm, WatchlistForm
 from .models import Watchlist
 
 
@@ -41,3 +42,38 @@ class WatchlistDeleteView(SuccessMessageMixin, DeleteView):
 
     def get_success_message(self, cleaned_data):
         return f'Watchlist "{self.object.name}" was deleted successfully.'
+
+
+class WatchlistAddAssetView(FormView):
+    form_class = AddToWatchlistForm
+    template_name = 'watchlists/watchlist_add_asset.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.watchlist = get_object_or_404(Watchlist, pk=kwargs['pk'])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['watchlist'] = self.watchlist
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['watchlist'] = self.watchlist
+        return context
+
+    def form_valid(self, form):
+        self.watchlist.assets.add(form.asset)
+        messages.success(self.request, f'{form.asset.ticker} was added to {self.watchlist.name}')
+        return redirect(self.watchlist)
+
+
+class WatchlistRemoveAssetView(View):
+    http_method_names = ['post']
+
+    def post(self, request, pk, asset_pk):
+        watchlist = get_object_or_404(Watchlist, pk=pk)
+        asset = get_object_or_404(watchlist.assets, pk=asset_pk)
+        watchlist.assets.remove(asset)
+        messages.success(request, f'{asset.ticker} was removed from {watchlist.name}')
+        return redirect(watchlist)
