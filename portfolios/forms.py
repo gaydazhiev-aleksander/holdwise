@@ -41,6 +41,8 @@ class PortfolioForm(forms.ModelForm):
 
 
 class AddHoldingForm(TickerLookupForm):
+    MAX_SHARES = Decimal('999999999999')
+
     shares = forms.DecimalField(
         max_digits=18,
         decimal_places=6,
@@ -79,9 +81,9 @@ class AddHoldingForm(TickerLookupForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        shares = self.cleaned_data.get('shares')
-        price = self.cleaned_data.get('price')
-        pay_from_cash = self.cleaned_data.get('pay_from_cash')
+        shares = cleaned_data.get('shares')
+        price = cleaned_data.get('price')
+        pay_from_cash = cleaned_data.get('pay_from_cash')
 
         if pay_from_cash and shares and price:
             cost = shares * price
@@ -89,7 +91,16 @@ class AddHoldingForm(TickerLookupForm):
             if cost > balance:
                 self.add_error(
                     'pay_from_cash',
-                    f'Not enough cash: this costs {cost:,.2f}, but you have {balance:,.2f}'
+                    f'Not enough cash: thsi costs {cost:,.2f}, but you have {balance:,.2f}',
+                )
+
+        if self.asset and shares:
+            existing = Holding.objects.filter(portfolio=self.portfolio, asset=self.asset).first()
+            if existing is not None and existing.shares + shares > self.MAX_SHARES:
+                self.add_error(
+                    'shares',
+                    f'You already hold {existing.shares.normalize():f} shares of {self.asset.ticker} '
+                    f'The total cannot exceed {self.MAX_SHARES:,}',
                 )
 
         return cleaned_data
@@ -126,6 +137,8 @@ class HoldingForm(forms.ModelForm):
 
 
 class SellHoldingForm(forms.Form):
+    MAX_PROCEEDS = Decimal('999999999999.99')
+
     shares = forms.DecimalField(
         max_digits=18,
         decimal_places=6,
@@ -164,6 +177,16 @@ class SellHoldingForm(forms.Form):
             )
 
         return shares
+
+    def clean(self):
+        cleaned_data = super().clean()
+        shares = cleaned_data.get('shares')
+        price = cleaned_data.get('price')
+
+        if shares and price and shares * price > self.MAX_PROCEEDS:
+            self.add_error('price', 'The sale amount is too large to record')
+
+        return cleaned_data
 
 
 class CashMovementForm(forms.ModelForm):

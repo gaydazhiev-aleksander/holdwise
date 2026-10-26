@@ -180,9 +180,9 @@ Design decisions:
 | Form | Type | Notable validation |
 |---|---|---|
 | `PortfolioForm` | ModelForm | Case-insensitive unique name, minimum length |
-| `AddHoldingForm` | Form (inherits `TickerLookupForm`) | Ticker format, ticker must exist on Yahoo Finance, positive shares and price, enough cash when paying from the reserve |
+| `AddHoldingForm` | Form (inherits `TickerLookupForm`) | Ticker format, ticker must exist on Yahoo Finance, positive shares and price, enough cash when paying from the reserve, merged total cannot exceed the share limit |
 | `HoldingForm` | ModelForm | **Asset field is disabled (read-only)**; positive shares and price |
-| `SellHoldingForm` | Form | Cannot sell more shares than held; price pre-filled with the market price |
+| `SellHoldingForm` | Form | Cannot sell more shares than held; sale amount must fit the cash ledger; price pre-filled with the market price |
 | `CashMovementForm` | ModelForm | Only deposit/withdrawal selectable; cannot withdraw more than the balance; minimum amount |
 | `WatchlistForm` | ModelForm | Case-insensitive unique name, minimum length |
 | `AddToWatchlistForm` | Form (inherits `TickerLookupForm`) | Ticker must exist; asset not already on the watchlist |
@@ -243,4 +243,6 @@ Every page is reachable through the navigation bar or links on other pages, and 
 ## Notes
 
 - Market data comes from Yahoo Finance through the unofficial `yfinance` library. Prices may be delayed, and Yahoo occasionally rate-limits requests. When that happens, Holdwise keeps showing the last known price and displays a message instead of failing.
+- All values are assumed to be in USD. Assets priced in other currencies (e.g. `SAP.DE` in EUR) are not converted.
+- Prices are stored to 4 decimal places, so assets priced below $0.0001 (e.g. some cryptocurrencies) are not supported.
 - Holdwise is a tracking tool, not investment advice.
