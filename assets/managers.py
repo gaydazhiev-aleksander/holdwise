@@ -48,6 +48,28 @@ class AssetQuerySet(models.QuerySet):
             )
         )
 
+    def position_totals(self):
+        positions = list(self.with_positions())
+        priced = [position for position in positions if position.market_value is not None]
+
+        invested = sum((position.total_cost for position in positions), Decimal('0'))
+        market_value = sum((position.market_value for position in priced), Decimal('0'))
+        priced_cost = sum((position.total_cost for position in priced), Decimal('0'))
+        profit_loss= market_value - priced_cost
+        profit_loss_percent = (
+            profit_loss / priced_cost * Decimal('100') if priced_cost else Decimal('0')
+        )
+
+        return{
+            'count': len(positions),
+            'invested': invested,
+            'market_value': market_value,
+            'profit_loss': profit_loss,
+            'profit_loss_percent': profit_loss_percent,
+            'best': max(priced, key=lambda position: position.profit_loss_percent, default=None),
+            'worst': min(priced, key=lambda position: position.profit_loss_percent, default=None),
+        }
+
     def refresh_prices(self):
         """Refresh old prices."""
         refreshed = already_fresh = failed = 0
