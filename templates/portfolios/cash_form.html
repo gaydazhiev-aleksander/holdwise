@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Deposit or withdraw · {{ portfolio.name }}{% endblock %}
+
+{% block content %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'portfolios:list' %}">Portfolios</a></li>
+            <li class="breadcrumb-item"><a href="{{ portfolio.get_absolute_url }}">{{ portfolio.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Deposit or withdraw</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body p-4">
+                    <h1 class="h4 fw-bold mb-1">Deposit or withdraw</h1>
+                    <p class="text-secondary mb-4">Cash reserve of <strong>{{ portfolio.name }}</strong></p>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">{% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}</div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <div class="form-label fw-semibold">{{ form.movement_type.label }}</div>
+                            {% for radio in form.movement_type %}
+                                <div class="form-check form-check-inline">
+                                    {{ radio.tag }}
+                                    <label for="{{ radio.id_for_label }}" class="form-check-label">{{ radio.choice_label }}</label>
+                                </div>
+                            {% endfor %}
+                            {% for error in form.movement_type.errors %}
+                                <div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        {% for field in form %}
+                            {% if field.name != 'movement_type' %}
+                                <div class="mb-3">
+                                    <label for="{{ field.id_for_label }}" class="form-label fw-semibold">{{ field.label }}</label>
+                                    {{ field }}
+                                    {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+                                    {% for error in field.errors %}
+                                        <div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-dark"><i class="bi bi-check-lg me-1"></i>Save</button>
+                            <a href="{{ portfolio.get_absolute_url }}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
