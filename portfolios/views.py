@@ -95,3 +95,15 @@ class HoldingUpdateView(SuccessMessageMixin, UpdateView):
 
     def get_success_message(self, cleaned_data):
         return f'{self.object.asset.ticker} holding was updated.'
+
+
+class HoldingDeleteView(SuccessMessageMixin, DeleteView):
+    model = Holding
+    template_name = 'portfolios/holding_confirm_delete.html'
+    context_object_name = 'holding'
+
+    def get_success_url(self):
+        return self.object.portfolio.get_absolute_url()
+
+    def get_success_message(self, cleaned_data):
+        return f'{self.object.asset.ticker} was removed from {self.object.portfolio.name}'

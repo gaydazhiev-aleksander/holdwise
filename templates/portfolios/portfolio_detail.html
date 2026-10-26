@@ -129,7 +129,8 @@
                                     <a href="{% url 'portfolios:holding-edit' pk=holding.pk %}"
                                        class="btn btn-sm btn-outline-secondary" title="Edit"><i
                                             class="bi bi-pencil"></i></a>
-                                    {# step 10.6: delete button #}
+                                    <a href="{% url 'portfolios:holding-delete' pk=holding.pk %}"
+                                       class="btn btn-sm btn-outline-danger" title="Remove"><i class="bi bi-trash"></i></a>
                                     {# step 10.7: sell button #}
                                 </td>
                             </tr>
