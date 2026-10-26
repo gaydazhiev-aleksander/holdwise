@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load holdwise_tags %}
 {% block title %}Cash history · {{ portfolio.name }}{% endblock %}
 
 {% block content %}
@@ -14,9 +14,10 @@
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
         <div>
             <h1 class="h3 fw-bold mb-0">Cash history</h1>
-            <div class="text-secondary">Current balance: <strong>{{ portfolio.cash_balance|floatformat:"2g" }}</strong></div>
+            <div class="text-secondary">Current balance: <strong>{{ portfolio.cash_balance|money }}</strong></div>
         </div>
-        <a href="{% url 'portfolios:cash-add' pk=portfolio.pk %}" class="btn btn-dark"><i class="bi bi-plus-slash-minus me-1"></i>Deposit or withdraw</a>
+        <a href="{% url 'portfolios:cash-add' pk=portfolio.pk %}" class="btn btn-dark"><i
+                class="bi bi-plus-slash-minus me-1"></i>Deposit or withdraw</a>
     </div>
 
     {% if movements %}
@@ -24,26 +25,25 @@
             <div class="table-responsive">
                 <table class="table align-middle mb-0">
                     <thead class="table-light">
-                        <tr>
-                            <th>Date</th>
-                            <th>Type</th>
-                            <th>Note</th>
-                            <th class="text-end">Amount</th>
-                        </tr>
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Note</th>
+                        <th class="text-end">Amount</th>
+                    </tr>
                     </thead>
                     <tbody>
-                        {% for movement in movements %}
-                            <tr>
-                                <td class="text-nowrap">{{ movement.created_at|date:"d M Y, H:i" }}</td>
-                                <td><span class="badge text-bg-light border">{{ movement.get_movement_type_display }}</span></td>
-                                <td class="text-secondary">{{ movement.note|default:"—" }}</td>
-                                <td class="text-end">
-                                    <span class="{% if movement.signed_amount >= 0 %}text-profit{% else %}text-loss{% endif %}">
-                                        {% if movement.signed_amount >= 0 %}+{% endif %}{{ movement.signed_amount|floatformat:"2g" }}
-                                    </span>
-                                </td>
-                            </tr>
-                        {% endfor %}
+                    {% for movement in movements %}
+                        <tr>
+                            <td class="text-nowrap">{{ movement.created_at|date:"d M Y, H:i" }}</td>
+                            <td><span class="badge text-bg-light border">{{ movement.get_movement_type_display }}</span>
+                            </td>
+                            <td class="text-secondary">{{ movement.note|default:"—" }}</td>
+                            <td class="text-end">
+                                {% profit_loss movement.signed_amount %}
+                            </td>
+                        </tr>
+                    {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -53,11 +53,16 @@
             <nav class="mt-3" aria-label="Cash history pages">
                 <ul class="pagination justify-content-center">
                     {% if page_obj.has_previous %}
-                        <li class="page-item"><a class="page-link" href="{% querystring page=page_obj.previous_page_number %}">Previous</a></li>
+                        <li class="page-item"><a class="page-link"
+                                                 href="{% querystring page=page_obj.previous_page_number %}">Previous</a>
+                        </li>
                     {% endif %}
-                    <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+                    <li class="page-item disabled"><span
+                            class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                    </li>
                     {% if page_obj.has_next %}
-                        <li class="page-item"><a class="page-link" href="{% querystring page=page_obj.next_page_number %}">Next</a></li>
+                        <li class="page-item"><a class="page-link"
+                                                 href="{% querystring page=page_obj.next_page_number %}">Next</a></li>
                     {% endif %}
                 </ul>
             </nav>
