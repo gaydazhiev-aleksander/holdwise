@@ -27,7 +27,8 @@
                     <div class="stat-label">Last price</div>
                     <div class="stat-value">
                         {% if asset.last_price is not None %}
-                            {{ asset.last_price|floatformat:2 }} <span class="fs-6 text-secondary">{{ asset.currency }}</span>
+                            {{ asset.last_price|floatformat:2 }}
+                            <span class="fs-6 text-secondary">{{ asset.currency }}</span>
                         {% else %}
                             <span class="text-secondary">Unavailable</span>
                         {% endif %}
@@ -69,32 +70,33 @@
                 <div class="table-responsive">
                     <table class="table align-middle mb-0">
                         <thead class="table-light">
-                            <tr>
-                                <th>Portfolio</th>
-                                <th class="text-end">Shares</th>
-                                <th class="text-end">Avg. buy price</th>
-                                <th class="text-end">Value</th>
-                                <th class="text-end">Profit / loss</th>
-                            </tr>
+                        <tr>
+                            <th>Portfolio</th>
+                            <th class="text-end">Shares</th>
+                            <th class="text-end">Avg. buy price</th>
+                            <th class="text-end">Value</th>
+                            <th class="text-end">Profit / loss</th>
+                        </tr>
                         </thead>
                         <tbody>
-                            {% for holding in holdings %}
-                                <tr>
-                                    <td>{{ holding.portfolio.name }}</td>
-                                    <td class="text-end">{{ holding.shares|floatformat:"-6" }}</td>
-                                    <td class="text-end">{{ holding.average_buy_price|floatformat:2 }}</td>
-                                    <td class="text-end">{{ holding.current_value|floatformat:2|default:"—" }}</td>
-                                    <td class="text-end">
-                                        {% if holding.profit_loss is not None %}
-                                            <span class="{% if holding.profit_loss >= 0 %}text-profit{% else %}text-loss{% endif %}">
+                        {% for holding in holdings %}
+                            <tr>
+                                <td><a href="{{ holding.portfolio.get_absolute_url }}"
+                                       class="text-decoration-none">{{ holding.portfolio.name }}</a></td>
+                                <td class="text-end">{{ holding.shares|floatformat:"-6" }}</td>
+                                <td class="text-end">{{ holding.average_buy_price|floatformat:2 }}</td>
+                                <td class="text-end">{{ holding.current_value|floatformat:2|default:"—" }}</td>
+                                <td class="text-end">
+                                    {% if holding.profit_loss is not None %}
+                                        <span class="{% if holding.profit_loss >= 0 %}text-profit{% else %}text-loss{% endif %}">
                                                 {{ holding.profit_loss|floatformat:2 }} ({{ holding.profit_loss_percent|floatformat:2 }}%)
                                             </span>
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
                         </tbody>
                     </table>
                 </div>
@@ -108,7 +110,8 @@
         <div class="card-header bg-white fw-semibold">Watchlists</div>
         <div class="card-body">
             {% for watchlist in asset.watchlists.all %}
-                <span class="badge text-bg-light border me-1">{{ watchlist.name }}</span>
+                <a href="{{ watchlist.get_absolute_url }}"
+                   class="badge text-bg-light border me-1 text-decoration-none">{{ watchlist.name }}</a>
             {% empty %}
                 <span class="text-secondary">This asset is not on any watchlist yet.</span>
             {% endfor %}

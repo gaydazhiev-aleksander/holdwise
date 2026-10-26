@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Add asset · {{ watchlist.name }}{% endblock %}
+
+{% block content %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'watchlists:list' %}">Watchlists</a></li>
+            <li class="breadcrumb-item"><a href="{{ watchlist.get_absolute_url }}">{{ watchlist.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Add asset</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body p-4">
+                    <h1 class="h4 fw-bold mb-1">Add asset</h1>
+                    <p class="text-secondary mb-4">to <strong>{{ watchlist.name }}</strong>. New tickers are looked up on Yahoo Finance.</p>
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {% include 'partials/form_fields.html' %}
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-dark"><i class="bi bi-plus-lg me-1"></i>Add to watchlist</button>
+                            <a href="{{ watchlist.get_absolute_url }}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

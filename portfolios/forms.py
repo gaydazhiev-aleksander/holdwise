@@ -4,6 +4,7 @@ from decimal import Decimal
 from django import forms
 
 from assets.exceptions import MarketDataError
+from assets.forms import TickerLookupForm
 from assets.models import Asset
 
 from .choices import MovementType
@@ -43,16 +44,7 @@ class PortfolioForm(forms.ModelForm):
         return name
 
 
-class AddHoldingForm(forms.Form):
-    ticker = forms.CharField(
-        max_length=10,
-        label='Ticker symbol',
-        help_text='eg. AAPL, SPY, BTC-USD',
-        widget=forms.TextInput(attrs={
-            'placeholder': 'AAPL',
-            'class': 'form-control',
-        })
-    )
+class AddHoldingForm(TickerLookupForm):
     shares = forms.DecimalField(
         max_digits=18,
         decimal_places=6,
@@ -87,21 +79,7 @@ class AddHoldingForm(forms.Form):
     def __init__(self, *args, portfolio, **kwargs):
         super().__init__(*args, **kwargs)
         self.portfolio = portfolio
-        self.asset = None
         self.fields['pay_from_cash'].help_text = f'Available cash: {portfolio.cash_balance:,.2f}'
-
-    def clean_ticker(self):
-        ticker = self.cleaned_data['ticker'].strip().upper()
-
-        if not re.fullmatch(r'[A-Z0-9.\-]+', ticker):
-            raise forms.ValidationError("Invalid ticker")
-
-        try:
-            self.asset = Asset.objects.get_or_fetch(ticker)
-        except MarketDataError as error:
-            raise forms.ValidationError(str(error)) from error
-
-        return ticker
 
     def clean(self):
         cleaned_data = super().clean()

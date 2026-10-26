@@ -20,8 +20,7 @@
                     <a class="nav-link {% if app == 'assets' %}active{% endif %}" href="{% url 'assets:list' %}">Assets</a>
                 </li>
                 <li class="nav-item">
-                    {# TODO step 12: replace # with {% url 'watchlists:list' %} #}
-                    <a class="nav-link {% if app == 'watchlists' %}active{% endif %}" href="#">Watchlists</a>
+                    <a class="nav-link {% if app == 'watchlists' %}active{% endif %}" href="{% url 'watchlists:list' %}">Watchlists</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {% if url_name == 'about' %}active{% endif %}" href="{% url 'common:about' %}">About</a>
